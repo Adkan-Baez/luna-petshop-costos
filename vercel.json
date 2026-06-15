@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/extraer.js": {
+      "maxDuration": 30
+    }
+  }
+}
