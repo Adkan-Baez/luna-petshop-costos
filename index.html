@@ -465,9 +465,39 @@ function recalcCosto(i, inputEl) {
   document.getElementById(`costo-${i}`).textContent = `$${Math.round(total/cant).toLocaleString('es-CL')}`;
 }
 
-function confirmar() {
-  showToast('✅ Datos listos — integración a Google Drive en Fase 3');
-  setTimeout(resetUpload, 600);
+async function confirmar() {
+  const btn = document.querySelector('.review-actions .btn-grad');
+  btn.disabled = true;
+  btn.textContent = '⏳ Guardando en Google Sheets…';
+
+  try {
+    const response = await fetch('/api/sheets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ factura: extractedData })
+    });
+
+    const result = await response.json();
+
+    if (!result.success) throw new Error(result.error);
+
+    // Mostrar resumen de cambios
+    let msg = `✅ ${result.agregados} nuevos · ${result.actualizados} actualizados`;
+    if (result.cambios?.length > 0) {
+      const alertas = result.cambios
+        .map(c => `${c.nombre}: $${c.costoAnterior.toLocaleString('es-CL')} → $${c.costoNuevo.toLocaleString('es-CL')} (${c.diferencia > 0 ? '+' : ''}${c.porcentaje}%)`)
+        .join('\n');
+      console.log('Cambios de precio:\n' + alertas);
+    }
+
+    showToast(msg, 5000);
+    setTimeout(resetUpload, 1000);
+
+  } catch (err) {
+    showToast('❌ Error: ' + err.message, 5000);
+    btn.disabled = false;
+    btn.textContent = '✅ Confirmar e integrar';
+  }
 }
 
 // ═══════════════════════════════════════
