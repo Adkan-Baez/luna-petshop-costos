@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   const SHEET_ID = process.env.google_sheet_id;
   const CLIENT_EMAIL = process.env.google_service_account_email;
-  const PRIVATE_KEY = process.env.google_private_key?.replace(/\\n/g, '\n');
+  const PRIVATE_KEY = (process.env.google_private_key || '').replace(/\\n/g, '\n');
 
   try {
     // ── Obtener token de acceso Google ──
